@@ -23,3 +23,9 @@ export function formatTimestamp(timestamp: { seconds: number; nanoseconds: numbe
       return "";
   }
 }
+
+export function formatMood(goose: { name: string; mood: { x: number; y: number } }) {
+  return `${goose.name} is ${goose.mood.y < 0 && Math.abs(goose.mood.y) <= 80 ? "an " : "a "}${Math.abs(goose.mood.y) > 80 ? "very " : ""}${
+    goose.mood.y < 0 ? "ungripped" : "gripped"
+  }, ${Math.abs(goose.mood.x) > 80 ? "very " : ""}${goose.mood.x > 0 ? "silly" : "grumpy"} goose`;
+}

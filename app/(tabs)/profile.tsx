@@ -1,11 +1,11 @@
 import { useSession } from "@/hooks/useAuth";
-import { firestore, storage } from "@/lib/firebase";
+import { auth, firestore, storage } from "@/lib/firebase";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import React, { useEffect, useState } from "react";
-import { Button, Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity } from "react-native";
+import { Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity } from "react-native";
 
 export default function ProfileScreen() {
   const [name, setName] = useState("");
@@ -85,6 +85,15 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+      router.replace("/login");
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.label}>Profile Picture:</Text>
@@ -104,7 +113,13 @@ export default function ProfileScreen() {
         returnKeyType="done"
       />
 
-      <Button title={isLoading ? "Saving..." : "Save Changes"} onPress={updateUser} disabled={isLoading} />
+      <TouchableOpacity style={[styles.button, { marginBottom: 20 }]} onPress={updateUser} disabled={isLoading}>
+        <Text style={styles.buttonText}>{isLoading ? "Saving..." : "Save Changes"}</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
+        <Text style={styles.buttonText}>Logout</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -147,5 +162,10 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontFamily: "ComicSans",
+  },
+  logoutButton: {
+    backgroundColor: "#FF7C6E",
+    marginTop: 24,
+    width: "80%",
   },
 });

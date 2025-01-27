@@ -1,15 +1,16 @@
 {
   "expo": {
-    "name": "goose-o-meter",
+    "name": "Goose",
     "slug": "goose-o-meter",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yhprum.gooseometer"
     },
     "android": {
       "adaptiveIcon": {
@@ -32,6 +33,14 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#ffffff",
+          "sounds": ["./assets/sounds/notification.wav"]
+        }
       ]
     ],
     "experiments": {
@@ -42,6 +51,14 @@
         "asset": "assets/fonts/ComicSans.ttf",
         "family": "ComicSans"
       }
-    ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "d429c2e9-4d08-4565-aecd-bf59a971fe03"
+      }
+    }
   }
 }

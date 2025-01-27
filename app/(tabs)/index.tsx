@@ -1,7 +1,8 @@
 import { useSession } from "@/hooks/useAuth";
 import { firestore } from "@/lib/firebase";
-import { formatTimestamp } from "@/lib/utils";
-import { collection, doc, onSnapshot, setDoc } from "firebase/firestore";
+import { registerForPushNotificationsAsync } from "@/lib/notifications";
+import { formatMood, formatTimestamp } from "@/lib/utils";
+import { collection, doc, getDocs, onSnapshot, setDoc } from "firebase/firestore";
 import React, { Fragment, useEffect, useState } from "react";
 import { Dimensions, Image, PanResponder, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import GooseOMeterLogo from "../../assets/images/goose.svg";
@@ -49,6 +50,12 @@ export default function Grid() {
     return () => unsubscribe();
   }, [session.user]);
 
+  useEffect(() => {
+    if (session.user) {
+      registerForPushNotificationsAsync(session.user.uid);
+    }
+  }, [session.user]);
+
   // Convert screen coordinates to normalized coordinates (-100 to 100)
   const screenToNormalized = (screenX: number, screenY: number) => {
     const normalizedX = ((screenX - centerX) / centerX) * MAX_COORDINATE;
@@ -81,12 +88,39 @@ export default function Grid() {
     },
     onPanResponderRelease: () => {
       if (userRef) {
-        setDoc(userRef, { mood: position, updatedAt: new Date() }, { merge: true });
+        handleMoodUpdate();
+        // setDoc(userRef, { mood: position, updatedAt: new Date() }, { merge: true });
       }
     },
   });
 
   const pointPosition = normalizedToScreen(position.x, position.y);
+
+  const handleMoodUpdate = async () => {
+    if (userRef && userData) {
+      await setDoc(userRef, { mood: position, updatedAt: new Date() }, { merge: true });
+
+      // Get all device tokens except the current user's
+      const tokensSnapshot = await getDocs(collection(firestore, "tokens"));
+      const tokens = tokensSnapshot.docs.filter((doc) => doc.id !== session.user?.uid).map((doc) => doc.data().token);
+
+      // Send notification to all other users
+      await fetch("https://exp.host/--/api/v2/push/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(
+          tokens.map((token) => ({
+            to: token,
+            sound: "default",
+            title: "Goose News",
+            body: formatMood({ name: userData.name, mood: position }),
+          }))
+        ),
+      });
+    }
+  };
 
   return (
     <SafeAreaView style={styles.pageContainer}>
@@ -196,11 +230,7 @@ export default function Grid() {
             .map((goose, index) => (
               <Fragment key={goose.id}>
                 <View style={[styles.userStatusItem, index !== 0 && styles.topBorder]}>
-                  <Text style={styles.userInfoText}>
-                    {goose.name} is a {Math.abs(goose.mood.y) > 80 ? "very " : ""}
-                    {goose.mood.y < 0 ? "ungripped" : "gripped"}, {Math.abs(goose.mood.x) > 80 ? "very " : ""}
-                    {goose.mood.x > 0 ? "silly" : "grumpy"} goose
-                  </Text>
+                  <Text style={styles.userInfoText}>{formatMood(goose)}</Text>
                   <Text style={styles.userInfoText}>{formatTimestamp(goose.updatedAt)}</Text>
                 </View>
               </Fragment>

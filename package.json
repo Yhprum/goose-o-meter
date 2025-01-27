@@ -1,7 +1,7 @@
 {
   "name": "goose-o-meter",
   "main": "expo-router/entry",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -43,7 +43,9 @@
     "react-native-svg": "15.8.0",
     "react-native-svg-transformer": "^1.5.0",
     "react-native-web": "~0.19.13",
-    "react-native-webview": "13.12.5"
+    "react-native-webview": "13.12.5",
+    "expo-notifications": "~0.29.12",
+    "expo-device": "~7.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

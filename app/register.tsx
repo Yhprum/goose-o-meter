@@ -3,7 +3,8 @@ import { auth } from "@/lib/firebase";
 import { Link, useRouter } from "expo-router";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import React, { useState } from "react";
-import { Button, StyleSheet, Text, TextInput, View } from "react-native";
+import { Dimensions, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import GooseOMeterLogo from "../assets/images/goose.svg";
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState("");
@@ -21,17 +22,25 @@ export default function RegisterScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <GooseOMeterLogo width={Dimensions.get("window").width} height={60} />
+      </View>
+
+      <Text style={styles.title}>Register</Text>
+
       <Text style={styles.label}>Email:</Text>
       <TextInput style={styles.input} placeholder="Enter email" value={email} onChangeText={setEmail} keyboardType="email-address" />
 
       <Text style={styles.label}>Password:</Text>
       <TextInput style={styles.input} placeholder="Enter password" value={password} onChangeText={setPassword} secureTextEntry />
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-      <Button title="Register" onPress={handleRegister} />
+      <TouchableOpacity style={styles.button} onPress={handleRegister}>
+        <Text style={styles.buttonText}>Register</Text>
+      </TouchableOpacity>
 
-      <Link style={styles.link} href="/login">
+      <Link style={styles.linkText} href="/login">
         Already have an account? Log in
       </Link>
     </View>
@@ -41,27 +50,59 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     justifyContent: "center",
+    padding: 20,
+    backgroundColor: "#FFF6E5", // Warm cream background
+  },
+  header: {
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
   },
   label: {
     fontSize: 18,
     marginVertical: 10,
   },
   input: {
-    borderColor: "#ddd",
+    height: 40,
+    borderColor: "#A76A61", // Vintage rose
     borderWidth: 1,
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
+    marginBottom: 12,
+    paddingHorizontal: 10,
+    borderRadius: 4,
+    backgroundColor: "#FAF0E6", // Lighter cream for input
+    fontFamily: "ComicSans",
   },
-  error: {
-    color: "red",
-    marginBottom: 10,
+  button: {
+    backgroundColor: "#A76A61", // Vintage rose
+    padding: 12,
+    borderRadius: 4,
+    alignItems: "center",
+    marginTop: 10,
   },
-  link: {
-    marginTop: 20,
-    color: "blue",
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontFamily: "ComicSans",
+  },
+  linkText: {
+    color: "#A76A61", // Vintage rose
     textAlign: "center",
+    marginTop: 20,
+    fontFamily: "ComicSans",
+  },
+  title: {
+    fontSize: 24,
+    textAlign: "center",
+    marginBottom: 24,
+    color: "#333",
+    fontFamily: "ComicSans",
+  },
+  errorText: {
+    color: "#FF7C6E", // Soft coral for errors
+    marginBottom: 12,
+    textAlign: "center",
+    fontFamily: "ComicSans",
   },
 });
