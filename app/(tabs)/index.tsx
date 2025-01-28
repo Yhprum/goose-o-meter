@@ -31,6 +31,7 @@ export default function Grid() {
   });
   const [userData, setUserData] = useState<UserData | null>(null);
   const [geese, setGeese] = useState<UserData[]>([]);
+  const [notificationTimeout, setNotificationTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const userRef = session.user ? doc(firestore, "rooms", "RLHXAPTnHK9gMybwIh7F", "geese", session.user.uid) : null;
 
@@ -96,31 +97,57 @@ export default function Grid() {
 
   const pointPosition = normalizedToScreen(position.x, position.y);
 
+  const sendMoodNotification = async () => {
+    if (!userRef || !userData) return;
+
+    // Get all device tokens except the current user's
+    const tokensSnapshot = await getDocs(collection(firestore, "tokens"));
+    const tokens = tokensSnapshot.docs.filter((doc) => doc.id !== session.user?.uid).map((doc) => doc.data().token);
+
+    // Send notification to all other users
+    await fetch("https://exp.host/--/api/v2/push/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(
+        tokens.map((token) => ({
+          to: token,
+          sound: "default",
+          title: "Goose News",
+          body: formatMood({ name: userData.name, mood: position }),
+        }))
+      ),
+    });
+  };
+
   const handleMoodUpdate = async () => {
-    if (userRef && userData) {
+    if (userRef) {
+      // Update the mood immediately
       await setDoc(userRef, { mood: position, updatedAt: new Date() }, { merge: true });
 
-      // Get all device tokens except the current user's
-      const tokensSnapshot = await getDocs(collection(firestore, "tokens"));
-      const tokens = tokensSnapshot.docs.filter((doc) => doc.id !== session.user?.uid).map((doc) => doc.data().token);
+      // Clear any existing timeout
+      if (notificationTimeout) {
+        clearTimeout(notificationTimeout);
+      }
 
-      // Send notification to all other users
-      await fetch("https://exp.host/--/api/v2/push/send", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(
-          tokens.map((token) => ({
-            to: token,
-            sound: "default",
-            title: "Goose News",
-            body: formatMood({ name: userData.name, mood: position }),
-          }))
-        ),
-      });
+      // Set new timeout for notification
+      const timeout = setTimeout(() => {
+        sendMoodNotification();
+      }, 10000); // 10 seconds
+
+      setNotificationTimeout(timeout);
     }
   };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (notificationTimeout) {
+        clearTimeout(notificationTimeout);
+      }
+    };
+  }, [notificationTimeout]);
 
   return (
     <SafeAreaView style={styles.pageContainer}>
