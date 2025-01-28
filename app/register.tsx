@@ -15,7 +15,7 @@ export default function RegisterScreen() {
   const handleRegister = () => {
     createUserWithEmailAndPassword(auth, email, password)
       .then(() => {
-        router.replace("/(tabs)");
+        router.replace("/(tabs)/profile");
       })
       .catch((err) => setError(err.message));
   };

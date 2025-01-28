@@ -8,7 +8,7 @@ export function formatTimestamp(timestamp: { seconds: number; nanoseconds: numbe
   switch (true) {
     case diff < minute:
       const seconds = Math.round(diff / 1000);
-      return `${seconds} ${seconds > 1 ? "seconds" : "second"} ago`;
+      return `${seconds} ${seconds === 1 ? "second" : "seconds"} ago`;
     case diff < hour:
       return Math.round(diff / minute) + " minutes ago";
     case diff < day:
@@ -25,7 +25,9 @@ export function formatTimestamp(timestamp: { seconds: number; nanoseconds: numbe
 }
 
 export function formatMood(goose: { name: string; mood: { x: number; y: number } }) {
-  return `${goose.name} is ${goose.mood.y < 0 && Math.abs(goose.mood.y) <= 80 ? "an " : "a "}${Math.abs(goose.mood.y) > 80 ? "very " : ""}${
-    goose.mood.y < 0 ? "ungripped" : "gripped"
-  }, ${Math.abs(goose.mood.x) > 80 ? "very " : ""}${goose.mood.x > 0 ? "silly" : "grumpy"} goose`;
+  return `${goose.name} is ${goose.mood.y < -20 && goose.mood.y >= -80 ? "an " : "a "}${
+    Math.abs(goose.mood.y) > 80 ? "very " : Math.abs(goose.mood.y) < 20 ? "slightly " : ""
+  }${goose.mood.y < 0 ? "ungripped" : "gripped"}, ${
+    Math.abs(goose.mood.x) > 80 ? "very " : Math.abs(goose.mood.x) < 20 ? "slightly " : ""
+  }${goose.mood.x > 0 ? "silly" : "grumpy"} goose`;
 }

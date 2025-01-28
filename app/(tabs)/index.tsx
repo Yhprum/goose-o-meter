@@ -20,7 +20,7 @@ interface UserData {
   name: string;
   mood: { x: number; y: number };
   profileImage: string;
-  updatedAt: { nanoseconds: number; seconds: number };
+  updatedAt?: { nanoseconds: number; seconds: number };
 }
 
 export default function Grid() {
@@ -226,12 +226,13 @@ export default function Grid() {
       <View style={styles.userInfoContainer}>
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
           {geese
-            .sort((a, b) => b.updatedAt.seconds - a.updatedAt.seconds)
+            .filter((goose) => goose.updatedAt)
+            .sort((a, b) => b.updatedAt!.seconds - a.updatedAt!.seconds)
             .map((goose, index) => (
               <Fragment key={goose.id}>
                 <View style={[styles.userStatusItem, index !== 0 && styles.topBorder]}>
                   <Text style={styles.userInfoText}>{formatMood(goose)}</Text>
-                  <Text style={styles.userInfoText}>{formatTimestamp(goose.updatedAt)}</Text>
+                  <Text style={styles.userInfoText}>{formatTimestamp(goose.updatedAt!)}</Text>
                 </View>
               </Fragment>
             ))}
