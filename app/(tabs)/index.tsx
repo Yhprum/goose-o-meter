@@ -4,7 +4,7 @@ import { registerForPushNotificationsAsync } from "@/lib/notifications";
 import { formatMood, formatTimestamp } from "@/lib/utils";
 import { collection, doc, getDocs, onSnapshot, setDoc } from "firebase/firestore";
 import React, { Fragment, useEffect, useState } from "react";
-import { Dimensions, Image, PanResponder, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import { AppState, AppStateStatus, Dimensions, Image, PanResponder, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import GooseOMeterLogo from "../../assets/images/goose.svg";
 
 const windowWidth = Dimensions.get("window").width;
@@ -140,9 +140,21 @@ export default function Grid() {
     }
   };
 
-  // Cleanup timeout on unmount
+  // Handle app state changes
   useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextAppState: AppStateStatus) => {
+      if (nextAppState === "background" || nextAppState === "inactive") {
+        // App is going to background or being closed
+        if (notificationTimeout) {
+          sendMoodNotification();
+          clearTimeout(notificationTimeout);
+          setNotificationTimeout(null);
+        }
+      }
+    });
+
     return () => {
+      subscription.remove();
       if (notificationTimeout) {
         clearTimeout(notificationTimeout);
       }

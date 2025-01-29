@@ -1,7 +1,7 @@
 {
   "name": "goose-o-meter",
   "main": "expo-router/entry",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -9,7 +9,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "build": "eas build --platform ios",
+    "deploy": "eas submit --platform ios"
   },
   "jest": {
     "preset": "jest-expo"
