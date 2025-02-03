@@ -7,27 +7,49 @@ export function formatTimestamp(timestamp: { seconds: number; nanoseconds: numbe
   const year = day * 365;
   switch (true) {
     case diff < minute:
-      const seconds = Math.round(diff / 1000);
-      return `${seconds} ${seconds === 1 ? "second" : "seconds"} ago`;
+      return formatUnit("second", Math.round(diff / 1000));
     case diff < hour:
-      return Math.round(diff / minute) + " minutes ago";
+      return formatUnit("minute", Math.round(diff / minute));
     case diff < day:
-      return Math.round(diff / hour) + " hours ago";
+      return formatUnit("hour", Math.round(diff / hour));
     case diff < month:
-      return Math.round(diff / day) + " days ago";
+      return formatUnit("day", Math.round(diff / day));
     case diff < year:
-      return Math.round(diff / month) + " months ago";
+      return formatUnit("month", Math.round(diff / month));
     case diff > year:
-      return Math.round(diff / year) + " years ago";
+      return formatUnit("year", Math.round(diff / year));
     default:
       return "";
   }
 }
 
+function formatUnit(unit: string, value: number) {
+  return `${value} ${value === 1 ? unit : `${unit}s`} ago`;
+}
+
+const NO_MODIFIER_MAX = 8;
+const SLIGHTLY_MAX = 25;
+const VERY_MIN = 75;
+
 export function formatMood(goose: { name: string; mood: { x: number; y: number } }) {
-  return `${goose.name} is ${goose.mood.y < -20 && goose.mood.y >= -80 ? "an " : "a "}${
-    Math.abs(goose.mood.y) > 80 ? "very " : Math.abs(goose.mood.y) < 20 ? "slightly " : ""
-  }${goose.mood.y < 0 ? "ungripped" : "gripped"}, ${
-    Math.abs(goose.mood.x) > 80 ? "very " : Math.abs(goose.mood.x) < 20 ? "slightly " : ""
-  }${goose.mood.x > 0 ? "silly" : "grumpy"} goose`;
+  let mood = `${goose.name} is `;
+  if (Math.abs(goose.mood.y) > NO_MODIFIER_MAX) {
+    mood += goose.mood.y < -20 && goose.mood.y >= -80 ? "an " : "a ";
+    mood += Math.abs(goose.mood.y) > VERY_MIN ? "very " : Math.abs(goose.mood.y) < SLIGHTLY_MAX ? "slightly " : "";
+    mood += goose.mood.y < 0 ? "ungripped" : "gripped";
+  } else {
+    mood += "a";
+  }
+
+  if (Math.abs(goose.mood.y) > NO_MODIFIER_MAX && Math.abs(goose.mood.x) > NO_MODIFIER_MAX) {
+    mood += ",";
+  }
+
+  if (Math.abs(goose.mood.x) > NO_MODIFIER_MAX) {
+    mood += Math.abs(goose.mood.x) > VERY_MIN ? " very" : Math.abs(goose.mood.x) < SLIGHTLY_MAX ? " slightly" : "";
+    mood += goose.mood.x > 0 ? " silly" : " grumpy";
+  }
+
+  mood += " goose";
+  return mood;
 }

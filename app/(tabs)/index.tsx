@@ -134,6 +134,7 @@ export default function Grid() {
       // Set new timeout for notification
       const timeout = setTimeout(() => {
         sendMoodNotification();
+        setNotificationTimeout(null);
       }, 10000); // 10 seconds
 
       setNotificationTimeout(timeout);
